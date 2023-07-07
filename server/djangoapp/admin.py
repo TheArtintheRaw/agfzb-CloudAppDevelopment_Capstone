@@ -1,13 +1,12 @@
 from django.contrib import admin
-# from .models import related models
+from .models import CarMake, CarModel
 
+class CarModelInline(admin.StackedInline):
+    model = CarModel
+    extra = 1
 
-# Register your models here.
+class CarMakeAdmin(admin.ModelAdmin):
+    inlines = [CarModelInline]
 
-# CarModelInline class
-
-# CarModelAdmin class
-
-# CarMakeAdmin class with CarModelInline
-
-# Register models here
+admin.site.register(CarMake, CarMakeAdmin)
+admin.site.register(CarModel)
