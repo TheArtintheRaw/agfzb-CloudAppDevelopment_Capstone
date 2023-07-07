@@ -1,3 +1,6 @@
+import json
+import logging
+from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
@@ -6,9 +9,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 # from .restapis import related methods
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from datetime import datetime
-import logging
-import json
+from .restapis import get_dealer_reviews_from_cf, post_request
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -98,6 +99,39 @@ def get_dealerships(request):
 # ...
 
 # Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+def add_review(request, dealer_id):
+    if not request.user.is_authenticated:
+        return HttpResponse("You must be authenticated to post reviews.")
 
+    review = {
+        "time": datetime.utcnow().isoformat(),
+        "name": request.user.username,
+        "dealership": dealer_id,
+        "review": "This is a great car dealer",
+        # Add other attributes as needed
+    }
+
+    json_payload = {
+        "review": review,
+    }
+
+    url = "https://your-cloud-function-url"  # Replace with your cloud function URL
+    response = post_request(url, json_payload, dealerId=dealer_id)
+
+    # Handle the response as per your requirement
+    if response.status_code == 200:
+        # Successful review submission
+        return HttpResponse("Review submitted successfully.")
+    else:
+        # Error in review submission
+        return HttpResponse("Error submitting review.")
+
+def get_dealer_details(request, dealer_id):
+    url = "https://your-cloud-function-url"  # Replace with your cloud function URL
+    dealer_reviews = get_dealer_reviews_from_cf(url, dealer_id)
+
+    context = {
+        'reviews': dealer_reviews,
+    }
+
+    return render(request, 'dealer_details.html', context)
