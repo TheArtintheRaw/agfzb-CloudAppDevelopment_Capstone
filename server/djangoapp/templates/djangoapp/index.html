@@ -42,7 +42,33 @@
             </div>
         </nav>
 
-    <!--Add a dealer table here -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Dealer Name</th>
+                <th>City</th>
+                <th>Address</th>
+                <th>Zip</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealership in dealerships %}
+            <tr>
+                <td>{{ dealership.id }}</td>
+                <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{ dealer.name }}</a></td>
+                <td>{{ dealership.city }}</td>
+                <td>{{ dealership.address }}</td>
+                <td>{{ dealership.zip }}</td>
+                <td>{{ dealership.state }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
     </body>
 
