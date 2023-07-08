@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Dealership Review</title>
-    {% load static %}
+    <title>My Dealership App</title>
+    <!-- Add your CSS and JavaScript dependencies here -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+
 </head>
-
-    <body>
-
-        <nav class="navbar navbar-light bg-light">
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="{% url 'djangoapp:index' %}">Dealership Review</a>
+                    <a class="navbar-brand" href="#">Dealership Review</a>
                 </div>
                 <ul class="nav navbar-nav navbar-right">
                     {% if user.is_authenticated %}
@@ -37,34 +41,12 @@
             </div>
         </nav>
 
-    <!-- Add reviews as cards -->
-
-    {% extends 'base.html' %}
-
-{% block content %}
-<div class="container">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <!-- Navbar content -->
-  </nav>
-  {% if user.is_authenticated %}
-  <a href="{% url 'add_review' %}?dealer_id={{ dealer.id }}" class="btn btn-primary">Add Review</a>
-  {% endif %}
-  <div class="card-columns">
-    {% for review in reviews %}
-    <div class="card">
-      <img class="card-img-left" src="{{ MEDIA_URL }}/emoji/{% if review.sentiment == 'positive' %}positive.png{% elif review.sentiment == 'negative' %}negative.png{% else %}neutral.png{% endif %}">
-      <div class="card-body">
-        <h5 class="card-title">{{ review.car_model }}</h5>
-        <p class="card-text">Make: {{ review.car_make }}</p>
-        <p class="card-text">Year of Purchase: {{ review.purchase_year }}</p>
-        <p class="card-text">{{ review.content }}</p>
-      </div>
+    <div class="container">
+        {% block content %}
+        <!-- Content specific to child templates will be inserted here -->
+        {% endblock %}
     </div>
-    {% endfor %}
-  </div>
-</div>
-{% endblock %}
 
-    </body>
-
+    <!-- Add your footer content here -->
+</body>
 </html>

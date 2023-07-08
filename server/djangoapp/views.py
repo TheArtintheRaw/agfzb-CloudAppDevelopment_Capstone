@@ -1,7 +1,7 @@
 import json
 import logging
 from datetime import datetime
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
@@ -100,38 +100,33 @@ def get_dealerships(request):
 
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
-    if not request.user.is_authenticated:
-        return HttpResponse("You must be authenticated to post reviews.")
-
-    review = {
-        "time": datetime.utcnow().isoformat(),
-        "name": request.user.username,
-        "dealership": dealer_id,
-        "review": "This is a great car dealer",
-        # Add other attributes as needed
-    }
-
-    json_payload = {
-        "review": review,
-    }
-
-    url = "https://your-cloud-function-url"  # Replace with your cloud function URL
-    response = post_request(url, json_payload, dealerId=dealer_id)
-
-    # Handle the response as per your requirement
-    if response.status_code == 200:
-        # Successful review submission
-        return HttpResponse("Review submitted successfully.")
-    else:
-        # Error in review submission
-        return HttpResponse("Error submitting review.")
+    context = {}
+    if request.method == "GET":
+        cars = query_cars_by_dealer(dealer_id)  # Assuming this function queries cars based on the dealer ID
+        context['cars'] = cars
+        return render(request, 'djangoapp/add_review.html', context)
+    elif request.method == "POST":
+        review = {
+            "id": dealer_id,
+            "name": request.user.username,
+            "review": {
+                "time": datetime.utcnow().isoformat(),
+                "content": request.POST.get("content"),
+                "purchase": request.POST.get("purchasecheck") == "on",
+                "purchase_date": request.POST.get("purchasedate"),
+                "car_make": request.POST.get("car_make"),
+                "car_model": request.POST.get("car_model")
+            }
+        }
+        json_payload = {"review": review}
+        response = post_request(json_payload)  # Assuming this function sends the review data to the backend
+        if response.status_code == 201:
+            return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
+        else:
+            return HttpResponse("Failed to add review.")
 
 def get_dealer_details(request, dealer_id):
-    url = "https://your-cloud-function-url"  # Replace with your cloud function URL
-    dealer_reviews = get_dealer_reviews_from_cf(url, dealer_id)
-
-    context = {
-        'reviews': dealer_reviews,
-    }
-
-    return render(request, 'dealer_details.html', context)
+    context = {}
+    reviews = get_dealer_reviews_from_cf(dealer_id)  # Assuming this function returns a list of reviews for the given dealer
+    context['reviews'] = reviews
+    return render(request, 'djangoapp/dealer_details.html', context)
