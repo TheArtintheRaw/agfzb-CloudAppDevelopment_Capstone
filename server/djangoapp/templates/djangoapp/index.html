@@ -1,52 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dealership Review</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <link href="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-
-</head>
-
-    <body>
-        {% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 
-    <table class="table">
-        <thead>
+<table class="table" id="table" data-filter-control="true">
+    <thead>
+        <tr>
+            <th data-field="id">ID</th>
+            <th data-field="full_name">Dealership Name</th>
+            <th data-field="city">City</th>
+            <th data-field="address">Address</th>
+            <th data-field="zip">ZIP Code</th>
+            <th data-field="state" data-filter-control="select">State</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        {% for dealer in dealership_list %}
             <tr>
-                <th>ID</th>
-                <th>Dealer Name</th>
-                <th>City</th>
-                <th>Address</th>
-                <th>Zip</th>
-                <th>State</th>
+                <td>{{dealer.id}}</td>
+                <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{dealer.full_name}}</a></td>
+                <td>{{dealer.city}}</td>
+                <td>{{dealer.address}}</td>
+                <td>{{dealer.zip}}</td>
+                <td>{{dealer.st}}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for dealership in dealerships %}
-            <tr>
-                <td>{{ dealership.id }}</td>
-                <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{ dealer.name }}</a></td>
-                <td>{{ dealership.city }}</td>
-                <td>{{ dealership.address }}</td>
-                <td>{{ dealership.zip }}</td>
-                <td>{{ dealership.state }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% endfor %}
+    </tbody>
+</table>
 
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
 
-    {% endblock %}
-
-    </body>
-
-</html>
+{% endblock %}
