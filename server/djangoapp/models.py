@@ -7,47 +7,72 @@ from django.db import models
 
 
 class CarMake(models.Model):
+    """_summary_
+
+    Args:
+        models (_type_): _description_
+
+    Returns:
+        _type_: _description_
     """
-    Model representing a car make.
-    """
-    name = models.CharField(null=False, max_length=30)
-    description = models.CharField(max_length=280)
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
+
+
+class DealerReview(models.Model):
+    """
+    Class representing dealer review data.
+    """
+
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    dealership = models.IntegerField()
+    review = models.TextField()
+    purchase = models.BooleanField()
+    purchase_date = models.DateField()
+    car_make = models.CharField(max_length=100)
+    car_model = models.CharField(max_length=100)
+    car_year = models.IntegerField()
+    sentiment = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'Review: {self.review} Sentiment: {self.sentiment}'
 
 
 class CarModel(models.Model):
+    """_summary_
+
+    Args:
+        models (_type_): _description_
+
+    Returns:
+        _type_: _description_
     """
-    Model representing a car model.
-    """
-    # Constant for c_type choices
     TYPES = (
-        ("SEDAN", "Sedan"),
-        ("SUV", "SUV"),
-        ("WAGON", "Wagon"),
-        ("LIMOUSINE", "Limousine"),
-        ("BATMOBILE", "Batmobile"),
+        ('SEDAN', 'Sedan'),
+        ('SUV', 'SUV'),
+        ('WAGON', 'Wagon'),
     )
 
     make = models.ForeignKey(CarMake, on_delete=models.CASCADE)
-    name = models.CharField(null=False, max_length=30)
-    c_type = models.CharField(max_length=30, choices=TYPES)
     dealer_id = models.IntegerField()
-    year = models.DateField()
-
-    objects = models.Manager()
+    name = models.CharField(max_length=100)
+    c_type = models.CharField(max_length=100, choices=TYPES)
+    year = models.IntegerField()
+    reviews = models.ManyToManyField(DealerReview)
 
     def __str__(self):
-        return f"Name: {self.name} Make Name: {self.make.name} Type: {self.c_type} Dealer ID: {self.dealer_id} Year: {self.year}"
+        return f'{self.name} ({self.make})'
 
 
 class CarDealer:
+    """_summary_
     """
-    Class representing car dealer data.
-    """
-
-    def __init__(self, address, city, full_name, id, lat, long, short_name, state, zip):
+    def __init__(self, address, city, full_name, dealer_id, lat, long, short_name, st, zip_code):
         # Dealer address
         self.address = address
         # Dealer city
@@ -55,7 +80,7 @@ class CarDealer:
         # Dealer Full Name
         self.full_name = full_name
         # Dealer id
-        self.id = id
+        self.dealer_id = dealer_id
         # Location lat
         self.lat = lat
         # Location long
@@ -63,30 +88,12 @@ class CarDealer:
         # Dealer short name
         self.short_name = short_name
         # Dealer state
-        self.state = state
-        # Dealer zip
-        self.zip = zip
+        self.st = st
+        # Dealer zip code
+        self.zip_code = zip_code
 
     def __str__(self):
-        return f"Dealer name: {self.full_name}"
+        return "Dealer name: " + self.full_name
 
 
-class DealerReview:
-    """
-    Class representing dealer review data.
-    """
 
-    def __init__(self, dealership, name, purchase, review, purchase_date, car_make, car_model, car_year, sentiment, id):
-        self.dealership = dealership
-        self.name = name
-        self.purchase = purchase
-        self.review = review
-        self.purchase_date = purchase_date
-        self.car_make = car_make
-        self.car_model = car_model
-        self.car_year = car_year
-        self.sentiment = sentiment  # Watson NLU service
-        self.id = id
-
-    def __str__(self):
-        return f"Review: {self.review} Sentiment: {self.sentiment}"

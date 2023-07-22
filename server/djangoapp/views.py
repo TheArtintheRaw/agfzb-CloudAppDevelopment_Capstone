@@ -8,8 +8,8 @@ import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
+from django.http import HttpResponse
 
-from .models import CarModel
 from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, post_request
 
 # Get an instance of a logger
@@ -48,7 +48,7 @@ def login_request(request):
     :return: Rendered index page or error message
     """
     context = {}
-    url = "https://92cc6dd6-884b-43de-ad25-8b0963773c83-bluemix.cloudantnosqldb.appdomain.cloud"
+    url = "http://127.0.0.1:8000/djangoapp"
     dealerships = get_dealers_from_cf(url)
     context["dealership_list"] = dealerships
 
@@ -75,16 +75,25 @@ def logout_request(request):
     :return: Rendered index page
     """
     context = {}
-    url = "https://92cc6dd6-884b-43de-ad25-8b0963773c83-bluemix.cloudantnosqldb.appdomain.cloud"
+    url = "https://us-south.functions.appdomain.cloud/api/v1/web/9cdefb68-1fae-422f-9f07-1688674cba78/api/get-dealerships"
     dealerships = get_dealers_from_cf(url)
     context["dealership_list"] = dealerships
 
-    print("Log out the user `{}`".format(request.user.username))
+    print(f"Log out the user `{request.user.username}`")
     logout(request)
     return render(request, 'djangoapp/index.html', context)
 
 
 def registration_request(request):
+    """
+    _summary_
+
+    Args:
+        request (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     context = {}
     # If it is a GET request, just render the registration page
     if request.method == 'GET':
@@ -93,7 +102,7 @@ def registration_request(request):
     if request.method == 'POST':
         # Get user information from request.POST
         username = request.POST['username']
-        password = request.POST['pword']
+        password = request.POST['psw']
         first_name = request.POST['fname']
         last_name = request.POST['lname']
         user_exist = False
@@ -103,12 +112,11 @@ def registration_request(request):
             user_exist = True
         except Exception:
             # If not, simply log this is a new user
-            logger.debug("{} is new user".format(username))
+            logger.debug("%s is new user", User.username)
         # If it is a new user
         if not user_exist:
             # Create user in auth_user table
-            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,
-                                            password=password)
+            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, password=password)
             # Login the user and redirect to course list page
             login(request, user)
             return redirect("djangoapp:index")
@@ -117,17 +125,14 @@ def registration_request(request):
             return render(request, 'djangoapp/registration.html', context)
 
 def get_dealerships(request):
-    """
-    Renders the index page with a list of dealerships.
-
-    :param request: HTTP request object
-    :return: Rendered index page with dealership list
-    """
-    context = {}
-    url = "https://92cc6dd6-884b-43de-ad25-8b0963773c83-bluemix.cloudantnosqldb.appdomain.cloud"
-    dealerships = get_dealers_from_cf(url)
-    context['dealership_list'] = dealerships
-    return render(request, 'djangoapp/index.html', context)
+    if request.method == "GET":
+        url = "your-cloud-function-domain/dealerships/dealer-get"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        # Concat all dealer's short name
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # Return a list of dealer short name
+        return HttpResponse(dealer_names)
 
 
 def get_dealer_details(request, dealer_id):
@@ -139,12 +144,13 @@ def get_dealer_details(request, dealer_id):
     :return: Rendered dealer details page with reviews
     """
     context = {}
-    url = "https://92cc6dd6-884b-43de-ad25-8b0963773c83-bluemix.cloudantnosqldb.appdomain.cloud"
-    
+    url = "https://us-south.functions.appdomain.cloud/api/v1/web/9cdefb68-1fae-422f-9f07-1688674cba78/api/get-dealerships"
+
     dealer_details = get_dealer_reviews_from_cf(url, dealer_id)
     context["dealer_id"] = dealer_id
     context["reviews"] = dealer_details
     return render(request, 'djangoapp/dealer_details.html', context)
+
 
 def add_review(request, dealer_id):
     """
@@ -155,13 +161,12 @@ def add_review(request, dealer_id):
     :return: Redirect to dealer details page or error message
     """
     context = {}
-    
+
     if request.method == 'GET':
         url = "url"
         context = {
             "dealer_id": dealer_id,
             "dealer_name": get_dealers_from_cf(url)[dealer_id - 1].full_name,
-            "cars": CarModel.objects.all()
         }
         return render(request, 'djangoapp/add_review.html', context)
     elif request.method == 'POST':
@@ -172,7 +177,7 @@ def add_review(request, dealer_id):
                 "dealership": dealer_id,
                 "review": request.POST["content"],
             }
-            
+
             if "purchasecheck" in request.POST:
                 review["purchase"] = True
                 car_parts = request.POST["car"].split("|")
@@ -186,10 +191,10 @@ def add_review(request, dealer_id):
                 review["car_make"] = None
                 review["car_model"] = None
                 review["car_year"] = None
-            
+
             try:
                 json_result = post_request("url", review, dealer_id=dealer_id)
-                
+
                 if "error" in json_result:
                     context["message"] = "ERROR: Review was not submitted."
                 else:
