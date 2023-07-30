@@ -125,3 +125,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 MEDIA_URL = '/media/'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_REDIRECT_URL = 'djangoapp:index'
+LOGIN_URL = 'djangoapp:login'
+
+IAM_API_KEY = 'Ym_DiKxmLti4lVvzxkvC-UwuhJXK1kL6UHf5kQX4XCo7'
+COUCH_URL = 'https://92cc6dd6-884b-43de-ad25-8b0963773c83-bluemix.cloudantnosqldb.appdomain.cloud'
+NLU_API_KEY = 'BnxdV3tV6Ky1zhxc5VtDgrqmp5tfliBPLYh9pAQ_F5hW'
