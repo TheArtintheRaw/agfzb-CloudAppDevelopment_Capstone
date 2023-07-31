@@ -115,7 +115,7 @@ def add_review(request, dealer_id):
         url = f"https://us-south.functions.appdomain.cloud/api/v1/web/9cdefb68-1fae-422f-9f07-1688674cba78/api/get-dealerships?dealerId={dealer_id}"
         # Get dealers from the URL
         context = {
-            "cars": CarModel.objects.all(),
+            "cars": CarModel(),
             "dealer": get_dealers_from_cf(url)[0],
         }
         print(context)
@@ -130,7 +130,7 @@ def add_review(request, dealer_id):
             }
         if form.get("purchasecheck"):
             review["purchasedate"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
-            car = CarModel.objects.get(pk=form["car"])
+            car = CarModel(pk=form["car"])
             review["car_make"] = car.car_make.name
             review["car_model"] = car.name
             review["car_year"]= car.year.strftime("%Y")
